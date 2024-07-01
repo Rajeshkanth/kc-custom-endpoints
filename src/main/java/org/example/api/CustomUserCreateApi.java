@@ -50,7 +50,7 @@ public class CustomUserCreateApi implements RealmResourceProvider {
         String email = userRep.getEmail();
         String token = extractTokenFromHeaders(httpHeaders);
 
-        if (!authorizeRequest("add-user", "addUser", token)) {
+        if (!isAuthorizedRequest(ADD_USER_SCOPE, ADD_USER_ID, token)) {
             return Response
                     .status(Response.Status.FORBIDDEN)
                     .entity(UNAUTHORIZED)
@@ -60,7 +60,7 @@ public class CustomUserCreateApi implements RealmResourceProvider {
         if (username == null || password == null) {
             return Response
                     .status(Response.Status.BAD_REQUEST)
-                    .entity(USERNAME_PSWD_REQUIRED)
+                    .entity(USERNAME_PASSWORD_REQUIRED)
                     .build();
         }
 
@@ -85,14 +85,14 @@ public class CustomUserCreateApi implements RealmResourceProvider {
         List<String> authHeaders = httpHeaders.getRequestHeader(HttpHeaders.AUTHORIZATION);
         if (authHeaders != null && !authHeaders.isEmpty()) {
             String authHeader = authHeaders.get(0);
-            if (authHeader.startsWith("Bearer")) {
+            if (authHeader.startsWith(BEARER)) {
                 return authHeader.substring(7);
             }
         }
         return null;
     }
 
-    private boolean authorizeRequest(String scope, String resourceId, String token) {
+    private boolean isAuthorizedRequest(String scope, String resourceId, String token) {
         try {
             if (token == null) {
                 logger.error("Token is missing");
@@ -137,7 +137,7 @@ public class CustomUserCreateApi implements RealmResourceProvider {
         Map<String, String> params = new HashMap<>();
         String token = extractTokenFromHeaders(httpHeaders);
 
-        if (!authorizeRequest("get-users", "getUsers", token)) {
+        if (!isAuthorizedRequest(GET_USERS_SCOPE, GET_USERS_ID, token)) {
             return Response.status(Response.Status.FORBIDDEN).entity(UNAUTHORIZED).build();
         }
 
